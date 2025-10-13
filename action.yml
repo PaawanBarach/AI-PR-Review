@@ -13,6 +13,9 @@ inputs:
   max_tokens:
     required: false
     default: "512"
+  llm_api_key:
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -36,7 +39,6 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
         LLM_PROVIDER: ${{ inputs.llm_provider }}
-        LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
         TOP_K: ${{ inputs.top_k }}
         MAX_TOKENS: ${{ inputs.max_tokens }}
         REPO_FULL: ${{ github.repository }}
@@ -44,6 +46,7 @@ runs:
         PR_TITLE: ${{ github.event.pull_request.title }}
         PR_BODY: ${{ github.event.pull_request.body }}
         PYTHONPATH: ${{ env.PYTHONPATH }}:$GITHUB_ACTION_PATH
+        LLM_API_KEY: ${{ inputs.llm_api_key }}
       run: |
         python - <<'PY'
         import json, os, asyncio, sys
