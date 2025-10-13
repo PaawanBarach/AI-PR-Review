@@ -1,0 +1,26 @@
+name: AI PR Review (RAG + citations)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: Repo-Aware AI PR Review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: OWNER/REPO@v1
+        with:
+          # Set to 'openrouter' to use an external LLM via OpenRouter; leave as 'none' for fallback mode.
+          llm_provider: none
+          # Optional tuning:
+          # top_k: "5"
+          # max_tokens: "512"
+        env:
+          # Optional: required only if llm_provider != none
+          # Add this as a repository secret: Settings → Secrets and variables → Actions → New repository secret
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}

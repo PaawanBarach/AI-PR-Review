@@ -1,0 +1,12 @@
+{
+  "name": "AI PR Review (RAG + citations)",
+  "description": "Posts citation-backed inline comments and a single summary on pull requests. Optional LLM (OpenRouter) or safe fallback without a key.",
+  "iconName": "code-review",
+  "categories": ["Code review", "Continuous integration"],
+  "filePatterns": [
+    "**/*.py",
+    "**/*.md",
+    "**/*.yml",
+    "**/*.yaml"
+  ]
+}

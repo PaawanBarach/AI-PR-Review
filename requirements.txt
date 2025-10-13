@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sentence-transformers
+faiss-cpu
+httpx
+pydantic
+pydantic-settings
+tenacity
+python-dotenv
+pytest
+ruff
+langchain-community
+chromadb

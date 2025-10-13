@@ -1,0 +1,67 @@
+name: Repo-Aware PR Review Copilot
+description: RAG-backed PR reviewer with citations and summary
+branding:
+  icon: search
+  color: blue
+inputs:
+  llm_provider:
+    required: false
+    default: none
+  top_k:
+    required: false
+    default: "5"
+  max_tokens:
+    required: false
+    default: "512"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - run: pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
+      shell: bash
+    - id: diff
+      shell: bash
+      run: |
+        BASE_SHA="${{ github.event.pull_request.base.sha }}"
+        HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+        git diff "$BASE_SHA..$HEAD_SHA" > pr_diff.txt
+        git diff --name-only "$BASE_SHA..$HEAD_SHA" | grep -E '\.(py|md|ya?ml)$' | jq -R -s -c 'split("\n")[:-1]' > changed.json
+    - name: Run review
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        LLM_PROVIDER: ${{ inputs.llm_provider }}
+        LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        TOP_K: ${{ inputs.top_k }}
+        MAX_TOKENS: ${{ inputs.max_tokens }}
+        REPO_FULL: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PYTHONPATH: ${{ env.PYTHONPATH }}:$GITHUB_ACTION_PATH
+      run: |
+        python - <<'PY'
+        import json, os, asyncio, sys
+        sys.path.append(os.environ.get("GITHUB_ACTION_PATH",""))
+        from api import ReviewService, ReviewRequest
+        repo = {"full_name": os.environ.get("REPO_FULL","")}
+        with open("changed.json","r",encoding="utf-8") as f: changed = json.loads(f.read() or "[]")
+        diff = open("pr_diff.txt","r",encoding="utf-8").read()
+        pr = {"number": int(os.environ.get("PR_NUMBER","0")), "title": os.environ.get("PR_TITLE",""), "body": os.environ.get("PR_BODY",""), "changed_files": changed}
+        req = ReviewRequest(repository=repo, pull_request=pr, diff_content=diff)
+        async def main():
+            async with ReviewService() as svc:
+                resp = await svc.review_pull_request(req)
+                print(json.dumps(resp.model_dump(), indent=2))
+        asyncio.run(main())
+        PY
+    - uses: actions/upload-artifact@v4
+      with:
+        name: review-metrics
+        path: review_metrics.jsonl
+        retention-days: 7
