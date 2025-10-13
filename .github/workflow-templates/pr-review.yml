@@ -13,7 +13,7 @@ jobs:
     name: Repo-Aware AI PR Review
     runs-on: ubuntu-latest
     steps:
-      - uses: OWNER/REPO@v1
+      - uses: PaawanBarach/AI-PR-Review@v1
         with:
           # Set to 'openrouter' to use an external LLM via OpenRouter; leave as 'none' for fallback mode.
           llm_provider: none
