@@ -1,4 +1,4 @@
-name: AI PR Review
+name: PatchPilot PR Review
 description: RAG-powered code review with LLM augmentation
 branding:
   icon: search
