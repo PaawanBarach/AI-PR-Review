@@ -149,3 +149,22 @@ class ReviewAgent:
         if ev:
             body += f"\nEvidence:\n" + "\n\n".join(ev[:3])
         return body
+    
+    def _summary(self, counts: Dict[str, int], comments: List[Dict[str, Any]]) -> str:
+    total = sum(counts.values())
+    high_conf = sum(1 for c in comments if c.get("confidence", 0) >= 0.85)
+    parts = [f"Found {total} issues across {len(comments)} locations."]
+    cats = []
+    if counts.get("security_issues", 0) or counts.get("secrets", 0):
+        cats.append(f"{counts.get('security_issues',0)} security, {counts.get('secrets',0)} secrets")
+    if counts.get("performance_issues", 0):
+        cats.append(f"{counts['performance_issues']} performance")
+    if counts.get("unused_imports", 0):
+        cats.append(f"{counts['unused_imports']} unused imports")
+    if counts.get("long_lines", 0):
+        cats.append(f"{counts['long_lines']} long lines")
+    if cats:
+        parts.append("Priority: " + ", ".join(cats) + ".")
+    if high_conf:
+        parts.append(f"{high_conf} findings are high-confidence.")
+    return " ".join(parts)
