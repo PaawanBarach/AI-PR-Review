@@ -25,6 +25,7 @@ review_metrics.jsonl
 .vector_store/
 *.faiss
 *.index
+.rag/
 
 # Build/dist (if ever used)
 build/
