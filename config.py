@@ -3,10 +3,12 @@ import os
 
 class Settings(BaseSettings):
     github_token: str = os.getenv("GITHUB_TOKEN", "")
-    llm_provider: str = os.getenv("LLM_PROVIDER", "none")
-    llm_api_key: str = os.getenv("LLM_API_KEY", "")
     embed_model: str = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-    store_backend: str = os.getenv("STORE_BACKEND", "faiss")
+    store_dir: str = os.getenv("STORE_DIR", ".rag/faiss")
+    top_k: int = int(os.getenv("TOP_K", "6"))
     max_tokens: int = int(os.getenv("MAX_TOKENS", "512"))
-    top_k: int = int(os.getenv("TOP_K", "5"))
-    p95_target: float = float(os.getenv("P95_TARGET", "90"))
+    confidence_threshold: float = float(os.getenv("CONFIDENCE_THRESHOLD", "0.75"))
+    llm_tier: str = os.getenv("LLM_TIER", "balanced")
+    llm_timeout: float = float(os.getenv("LLM_TIMEOUT", "30"))
+    enable_check_runs: bool = os.getenv("ENABLE_CHECK_RUNS", "true").lower() == "true"
+    enable_sarif: bool = os.getenv("ENABLE_SARIF", "true").lower() == "true"
